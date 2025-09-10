@@ -1,14 +1,13 @@
-import { CatalogId } from "../value-objects/catalog-id.value-object";
 import { Price } from "../value-objects/price.value-object";
-import { Category } from "../value-objects/category.value-object";
+import { UUID } from "../value-objects/uuid.value-object";
 
-export class CatalogItem {
+export class Product {
   private constructor(
-    private readonly _id: CatalogId,
+    private readonly _id: UUID,
     private _name: string,
     private _description: string,
     private _price: Price,
-    private _category: Category,
+    private _categoryId: string,
     private _isActive: boolean = true,
     private readonly _createdAt: Date = new Date(),
     private _updatedAt: Date = new Date(),
@@ -17,18 +16,11 @@ export class CatalogItem {
   static create(
     name: string,
     description: string,
-    price: number,
-    currency: string,
-    categoryName: string,
+    price: Price,
+    categoryId: string,
     id?: string,
-  ): CatalogItem {
-    return new CatalogItem(
-      new CatalogId(id),
-      name,
-      description,
-      new Price(price, currency),
-      new Category(categoryName),
-    );
+  ): Product {
+    return new Product(new UUID(id), name, description, price, categoryId);
   }
 
   static fromPersistence(
@@ -37,17 +29,17 @@ export class CatalogItem {
     description: string,
     price: number,
     currency: string,
-    categoryName: string,
+    categoryId: string,
     isActive: boolean,
     createdAt: Date,
     updatedAt: Date,
-  ): CatalogItem {
-    return new CatalogItem(
-      new CatalogId(id),
+  ): Product {
+    return new Product(
+      new UUID(id),
       name,
       description,
       new Price(price, currency),
-      new Category(categoryName),
+      categoryId,
       isActive,
       createdAt,
       updatedAt,
@@ -55,7 +47,7 @@ export class CatalogItem {
   }
 
   // Getters
-  get id(): CatalogId {
+  get id(): UUID {
     return this._id;
   }
 
@@ -71,8 +63,8 @@ export class CatalogItem {
     return this._price;
   }
 
-  get category(): Category {
-    return this._category;
+  get categoryId(): string {
+    return this._categoryId;
   }
 
   get isActive(): boolean {
@@ -98,13 +90,12 @@ export class CatalogItem {
     this._updatedAt = new Date();
   }
 
-  updatePrice(price: number, currency: string): void {
-    this._price = new Price(price, currency);
-    this._updatedAt = new Date();
+  updateCategory(categoryId: string): void {
+    this._categoryId = categoryId;
   }
 
-  updateCategory(categoryName: string): void {
-    this._category = new Category(categoryName);
+  updatePrice(price: number, currency: string): void {
+    this._price = new Price(price, currency);
     this._updatedAt = new Date();
   }
 
@@ -129,6 +120,5 @@ export class CatalogItem {
     }
 
     this._price.validate();
-    this._category.validate();
   }
 }

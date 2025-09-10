@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 
-export class CatalogId {
+export class UUID {
   private readonly _value: string;
 
   constructor(value?: string) {
@@ -16,11 +16,11 @@ export class CatalogId {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
     if (!uuidRegex.test(this._value)) {
-      throw new Error("Invalid UUID format for CatalogId");
+      throw new Error("Invalid UUID format");
     }
   }
 
-  equals(other: CatalogId): boolean {
+  equals(other: UUID): boolean {
     return this._value === other._value;
   }
 

@@ -1,27 +1,23 @@
 import { Injectable } from "@nestjs/common";
-import { CatalogItem } from "../entities/catalog-item.entity";
+import { Product } from "../entities/product.entity";
+import { Price } from "../value-objects/price.value-object";
 
 export interface CreateCatalogItemData {
   name: string;
   description: string;
   price: number;
   currency: string;
-  category: string;
+  categoryId: string;
   id?: string;
 }
 
 @Injectable()
-export class CatalogItemFactory {
-  create(data: CreateCatalogItemData): CatalogItem {
+export class ProductFactory {
+  create(data: CreateCatalogItemData): Product {
     try {
-      const item = CatalogItem.create(
-        data.name,
-        data.description,
-        data.price,
-        data.currency,
-        data.category,
-        data.id,
-      );
+      const price = new Price(data.price, data.currency);
+
+      const item = Product.create(data.name, data.description, price, data.categoryId);
 
       item.validate();
       return item;
@@ -36,19 +32,19 @@ export class CatalogItemFactory {
     description: string,
     price: number,
     currency: string,
-    category: string,
+    categoryId: string,
     isActive: boolean,
     createdAt: Date,
     updatedAt: Date,
-  ): CatalogItem {
+  ): Product {
     try {
-      return CatalogItem.fromPersistence(
+      return Product.fromPersistence(
         id,
         name,
         description,
         price,
         currency,
-        category,
+        categoryId,
         isActive,
         createdAt,
         updatedAt,
