@@ -2,41 +2,53 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 
 // Domain
-import { CatalogItemFactory } from "./domain/factories/catalog-item.factory";
+import { ProductFactory } from "./domain/factories/product.factory";
 
 // Infrastructure
-import { CatalogItemModel } from "./infrastructure/models/catalog-item.model";
-import { CatalogRepositoryImpl } from "./infrastructure/repositories/catalog.repository";
+import { CategoryModel } from "./infrastructure/models/category.model";
+import { CategoryRepositoryImpl } from "./infrastructure/repositories/category.repository";
+import { ProductModel } from "./infrastructure/models/product.model";
+import { ProductRepositoryImpl } from "./infrastructure/repositories/product.repository";
 
 // Application
-import { CreateCatalogItemUseCase } from "./application/use-cases/create-catalog-item.use-case";
-import { GetCatalogItemUseCase } from "./application/use-cases/get-catalog-item.use-case";
-import { GetAllCatalogItemsUseCase } from "./application/use-cases/get-all-catalog-items.use-case";
-import { UpdateCatalogItemUseCase } from "./application/use-cases/update-catalog-item.use-case";
-import { DeleteCatalogItemUseCase } from "./application/use-cases/delete-catalog-item.use-case";
+import { CreateCategoryUseCase } from "./application/use-cases/create-category.use-case";
+import { GetAllCategoriesUseCase } from "./application/use-cases/get-all-categories.use-case";
+import { CreateProductUseCase } from "./application/use-cases/create-product.use-case";
+import { GetProductUseCase } from "./application/use-cases/get-product.use-case";
+import { GetAllProductsUseCase } from "./application/use-cases/get-all-products.use-case";
+import { UpdateProductUseCase } from "./application/use-cases/update-product.use-case";
+import { DeleteProductUseCase } from "./application/use-cases/delete-product.use-case";
 
 // Presentation
-import { CatalogController } from "./presentation/controllers/catalog.controller";
+import { CategoryController } from "./presentation/controllers/category.controller";
+import { ProductController } from "./presentation/controllers/product.controller";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CatalogItemModel])],
-  controllers: [CatalogController],
+  imports: [TypeOrmModule.forFeature([CategoryModel, ProductModel])],
+  controllers: [CategoryController, ProductController],
   providers: [
     // Domain
-    CatalogItemFactory,
+    ProductFactory,
 
     // Infrastructure
     {
-      provide: "CatalogRepositoryInterface",
-      useClass: CatalogRepositoryImpl,
+      provide: "CategoryRepositoryInterface",
+      useClass: CategoryRepositoryImpl,
+    },
+    {
+      provide: "ProductRepositoryInterface",
+      useClass: ProductRepositoryImpl,
     },
 
     // Application
-    CreateCatalogItemUseCase,
-    GetCatalogItemUseCase,
-    GetAllCatalogItemsUseCase,
-    UpdateCatalogItemUseCase,
-    DeleteCatalogItemUseCase,
+    CreateCategoryUseCase,
+    GetAllCategoriesUseCase,
+
+    CreateProductUseCase,
+    GetProductUseCase,
+    GetAllProductsUseCase,
+    UpdateProductUseCase,
+    DeleteProductUseCase,
   ],
 })
 export class CatalogModule {}

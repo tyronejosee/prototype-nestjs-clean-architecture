@@ -2,12 +2,11 @@ import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { CatalogModule } from "./catalog/catalog.module";
+import { HealthModule } from "./health/health.module";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-    }),
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: "postgres",
       host: process.env.DATABASE_HOST,
@@ -18,6 +17,7 @@ import { CatalogModule } from "./catalog/catalog.module";
       autoLoadEntities: true,
       synchronize: process.env.NODE_ENV === "development",
     }),
+    HealthModule,
     CatalogModule,
   ],
 })

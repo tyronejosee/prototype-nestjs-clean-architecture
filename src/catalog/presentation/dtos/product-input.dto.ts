@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsString, IsNumber, IsNotEmpty, Min, Length } from "class-validator";
+import { IsString, IsNumber, IsNotEmpty, Min, Length, IsUUID } from "class-validator";
 
-export class CreateCatalogItemDto {
+export class ProductInputDto {
   @ApiProperty({
     description: "The name of the catalog item",
     example: "Premium Coffee Beans",
@@ -41,13 +41,9 @@ export class CreateCatalogItemDto {
   currency: string;
 
   @ApiProperty({
-    description: "The category of the catalog item",
-    example: "Beverages",
-    minLength: 1,
-    maxLength: 100,
+    description: "The category of the product",
+    example: "b7c0c9a6-cf92-4a81-a7e0-c8b4f87b9b6c",
   })
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 100)
-  category: string;
+  @IsUUID()
+  categoryId: string;
 }
