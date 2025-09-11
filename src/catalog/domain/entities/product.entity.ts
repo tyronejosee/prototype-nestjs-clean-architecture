@@ -1,3 +1,4 @@
+import { DomainException } from "../exceptions/domain.exception";
 import { Price } from "../value-objects/price.value-object";
 import { UUID } from "../value-objects/uuid.value-object";
 
@@ -5,44 +6,44 @@ export class Product {
   private constructor(
     private readonly _id: UUID,
     private _name: string,
-    private _description: string,
     private _price: Price,
     private _categoryId: string,
     private _isActive: boolean = true,
     private readonly _createdAt: Date = new Date(),
     private _updatedAt: Date = new Date(),
+    private _description?: string,
   ) {}
 
   static create(
     name: string,
-    description: string,
     price: Price,
     categoryId: string,
     id?: string,
+    description?: string,
   ): Product {
-    return new Product(new UUID(id), name, description, price, categoryId);
+    return new Product(new UUID(id), name, price, categoryId, description ? true : false);
   }
 
   static fromPersistence(
     id: string,
     name: string,
-    description: string,
     price: number,
     currency: string,
     categoryId: string,
     isActive: boolean,
     createdAt: Date,
     updatedAt: Date,
+    description?: string,
   ): Product {
     return new Product(
       new UUID(id),
       name,
-      description,
       new Price(price, currency),
       categoryId,
       isActive,
       createdAt,
       updatedAt,
+      description,
     );
   }
 
@@ -55,7 +56,7 @@ export class Product {
     return this._name;
   }
 
-  get description(): string {
+  get description(): string | undefined {
     return this._description;
   }
 
@@ -80,13 +81,13 @@ export class Product {
   }
 
   // Business methods
-  updateInfo(name: string, description: string): void {
+  updateInfo(name: string, description?: string): void {
     if (!name || name.trim().length === 0) {
-      throw new Error("Name cannot be empty");
+      throw new DomainException("Name cannot be empty");
     }
 
     this._name = name.trim();
-    this._description = description?.trim() || "";
+    this._description = description?.trim();
     this._updatedAt = new Date();
   }
 
@@ -112,11 +113,11 @@ export class Product {
   // Domain validation
   validate(): void {
     if (!this._name || this._name.trim().length === 0) {
-      throw new Error("Catalog item name is required");
+      throw new DomainException("Catalog item name is required");
     }
 
     if (this._name.length > 255) {
-      throw new Error("Catalog item name cannot exceed 255 characters");
+      throw new DomainException("Catalog item name cannot exceed 255 characters");
     }
 
     this._price.validate();

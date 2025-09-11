@@ -1,36 +1,16 @@
-import { Injectable, Inject } from "@nestjs/common";
 import { Category } from "@/catalog/domain/entities/category.entity";
-import { CategoryRepositoryInterface } from "@/catalog/domain/interfaces/catagory.repository.interface";
+import { CategoryRepositoryInterface } from "@/catalog/domain/interfaces/category.repository.interface";
+import { CategoryResponseDto, CreateCategoryRequestDto } from "../dtos/category.dto";
+import { CategoryMapper } from "../mappers/category.mapper";
 
-export interface CreateCategoryRequest {
-  name: string;
-}
-
-export interface CreateCategoryResponse {
-  id: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-@Injectable()
 export class CreateCategoryUseCase {
-  constructor(
-    @Inject("CategoryRepositoryInterface")
-    private readonly categoryRepository: CategoryRepositoryInterface,
-  ) {}
+  constructor(private readonly categoryRepository: CategoryRepositoryInterface) {}
 
-  async execute(request: CreateCategoryRequest): Promise<CreateCategoryResponse> {
+  async execute(request: CreateCategoryRequestDto): Promise<CategoryResponseDto> {
     const category = Category.create(request.name);
     category.validate();
 
     const saved = await this.categoryRepository.save(category);
-
-    return {
-      id: saved.id.value,
-      name: saved.name,
-      createdAt: saved.createdAt,
-      updatedAt: saved.updatedAt,
-    };
+    return CategoryMapper.toResponse(saved);
   }
 }

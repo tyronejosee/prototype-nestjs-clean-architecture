@@ -1,46 +1,22 @@
-import { Injectable, Inject } from "@nestjs/common";
 import { Product } from "@/catalog/domain/entities/product.entity";
-import { ProductFactory } from "@/catalog/domain/factories/product.factory";
 import { ProductRepositoryInterface } from "@/catalog/domain/interfaces/product.repository.interface";
 import { CreateProductRequestDto, ProductResponseDto } from "../dtos/product.dto";
+import { ProductMapper } from "../mappers/product.mapper";
+import { Price } from "@/catalog/domain/value-objects/price.value-object";
 
-@Injectable()
 export class CreateProductUseCase {
-  constructor(
-    @Inject("ProductRepositoryInterface")
-    private readonly productRespository: ProductRepositoryInterface,
-    private readonly productFactory: ProductFactory,
-  ) {}
+  constructor(private readonly productRepository: ProductRepositoryInterface) {}
 
   async execute(request: CreateProductRequestDto): Promise<ProductResponseDto> {
-    try {
-      const catalogItem = this.productFactory.create({
-        name: request.name,
-        description: request.description,
-        price: request.price,
-        currency: request.currency,
-        categoryId: request.categoryId,
-      });
+    const product = Product.create(
+      request.name,
+      request.description,
+      new Price(request.price, request.currency),
+      request.categoryId,
+    );
+    product.validate();
 
-      const savedItem = await this.productRespository.save(catalogItem);
-
-      return this.mapToResponse(savedItem);
-    } catch (error) {
-      throw new Error(`Failed to create catalog item: ${error.message}`);
-    }
-  }
-
-  private mapToResponse(catalogItem: Product): ProductResponseDto {
-    return {
-      id: catalogItem.id.value,
-      name: catalogItem.name,
-      description: catalogItem.description,
-      price: catalogItem.price.amount,
-      currency: catalogItem.price.currency,
-      categoryId: catalogItem.categoryId,
-      isActive: catalogItem.isActive,
-      createdAt: catalogItem.createdAt,
-      updatedAt: catalogItem.updatedAt,
-    };
+    const savedItem = await this.productRepository.save(product);
+    return ProductMapper.toResponse(savedItem);
   }
 }

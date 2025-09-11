@@ -1,3 +1,4 @@
+import { DomainException } from "../exceptions/domain.exception";
 import { UUID } from "../value-objects/uuid.value-object";
 
 export class Category {
@@ -34,7 +35,7 @@ export class Category {
 
   updateName(name: string): void {
     if (!name || name.trim().length === 0) {
-      throw new Error("Category name cannot be empty");
+      throw new DomainException("Category name cannot be empty");
     }
     this._name = name.trim();
     this._updatedAt = new Date();
@@ -42,10 +43,10 @@ export class Category {
 
   validate(): void {
     if (!this._name || this._name.length === 0) {
-      throw new Error("Category name is required");
+      throw new DomainException("Category name is required");
     }
     if (this._name.length > 100) {
-      throw new Error("Category name cannot exceed 100 characters");
+      throw new DomainException("Category name cannot exceed 100 characters");
     }
   }
 }

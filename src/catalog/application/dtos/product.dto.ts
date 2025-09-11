@@ -1,9 +1,6 @@
-// Base
-export class PaginatedDto<T> {
-  items: T[];
-  total: number;
-}
+import { PaginatedDto } from "./common.dto";
 
+// Base
 export class ProductDto {
   id: string;
   name: string;
