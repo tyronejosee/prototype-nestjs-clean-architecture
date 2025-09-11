@@ -31,6 +31,10 @@ import { GetProductUseCase } from "@/catalog/application/use-cases/get-product.u
 import { GetAllProductsUseCase } from "@/catalog/application/use-cases/get-all-products.use-case";
 import { UpdateProductUseCase } from "@/catalog/application/use-cases/update-product.use-case";
 import { DeleteProductUseCase } from "@/catalog/application/use-cases/delete-product.use-case";
+import {
+  DomainException,
+  ProductNotFoundException,
+} from "@/catalog/domain/exceptions/domain.exception";
 
 @ApiTags("catalog")
 @Controller("products")
@@ -48,22 +52,25 @@ export class ProductController {
   @ApiResponse({
     status: 201,
     description: "The product has been successfully created.",
-    type: ProductInputDto,
+    type: ProductOutputDto,
   })
   @ApiBadRequestResponse({ description: "Invalid input data" })
-  async create(@Body() createCatalogItemDto: ProductInputDto): Promise<ProductOutputDto> {
+  async create(@Body() dto: ProductInputDto): Promise<ProductOutputDto> {
     try {
       const result = await this.createProductUseCase.execute({
-        name: createCatalogItemDto.name,
-        description: createCatalogItemDto.description,
-        price: createCatalogItemDto.price,
-        currency: createCatalogItemDto.currency,
-        categoryId: createCatalogItemDto.categoryId,
+        name: dto.name,
+        description: dto.description,
+        price: dto.price,
+        currency: dto.currency,
+        categoryId: dto.categoryId,
       });
 
       return result;
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error instanceof DomainException) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
     }
   }
 
@@ -84,18 +91,12 @@ export class ProductController {
   })
   async findOne(@Param("id") id: string): Promise<ProductOutputDto> {
     try {
-      const result = await this.getProductUseCase.execute({ id });
-
-      if (!result) {
-        throw new NotFoundException(`Product with ID ${id} not found`);
-      }
-
-      return result;
+      return await this.getProductUseCase.execute({ id });
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error instanceof ProductNotFoundException) {
+        throw new NotFoundException(error.message);
       }
-      throw new BadRequestException(error.message);
+      throw error;
     }
   }
 
@@ -113,26 +114,14 @@ export class ProductController {
   })
   @ApiNotFoundResponse({ description: "Catalog item not found" })
   @ApiBadRequestResponse({ description: "Invalid input data" })
-  async update(
-    @Param("id") id: string,
-    @Body() updateCatalogItemDto: ProductInputDto,
-  ): Promise<ProductOutputDto> {
+  async update(@Param("id") id: string, @Body() dto: ProductInputDto): Promise<ProductOutputDto> {
     try {
-      const result = await this.updateProductUseCase.execute({
-        id,
-        ...updateCatalogItemDto,
-      });
-
-      if (!result) {
-        throw new NotFoundException(`Product with ID ${id} not found`);
-      }
-
-      return result;
+      return await this.updateProductUseCase.execute({ id, ...dto });
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error instanceof ProductNotFoundException) {
+        throw new NotFoundException(error.message);
       }
-      throw new BadRequestException(error.message);
+      throw error;
     }
   }
 
@@ -151,16 +140,12 @@ export class ProductController {
   @ApiNotFoundResponse({ description: "Product not found" })
   async remove(@Param("id") id: string): Promise<void> {
     try {
-      const deleted = await this.deleteProductUseCase.execute({ id });
-
-      if (!deleted) {
-        throw new NotFoundException(`Product with ID ${id} not found`);
-      }
+      await this.deleteProductUseCase.execute({ id });
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error instanceof ProductNotFoundException) {
+        throw new NotFoundException(error.message);
       }
-      throw new BadRequestException(error.message);
+      throw error;
     }
   }
 
@@ -175,7 +160,10 @@ export class ProductController {
     try {
       return await this.getAllProductsUseCase.execute();
     } catch (error) {
-      throw new BadRequestException(error.message);
+      if (error instanceof DomainException) {
+        throw new BadRequestException(error.message);
+      }
+      throw error;
     }
   }
 }
